@@ -16,8 +16,10 @@ import com.aguileda.myopka.KarotzInterface;
 public class MainActivity extends Activity {
 
     private Button sendButton;
+    private Button clearButton;
     private KarotzInterface myKarotz;
     private Spinner voiceSpinner;
+    private EditText text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         myKarotz = new KarotzInterface(this);
 
+        text = (EditText) findViewById(R.id.editText);
 
         voiceSpinner = (Spinner) findViewById(R.id.voiceSpinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -40,12 +43,24 @@ public class MainActivity extends Activity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText text = (EditText) findViewById(R.id.editText);
-                String textToSay = text.getText().toString();
+
+                String textToSay = MainActivity.this.text.getText().toString();
 
                 String voice = MainActivity.this.voiceSpinner.getSelectedItem().toString();
 
                 MainActivity.this.myKarotz.saySomething(textToSay,voice);
+            }
+        });
+
+        clearButton = (Button) findViewById(R.id.clearButton);
+
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                MainActivity.this.text.setText("");
+
+
             }
         });
     }
