@@ -23,7 +23,7 @@ public class KarotzInterface {
 
     }
 
-    public void saySomething(String text) {
+    public void saySomething(String text, String voice) {
 
         try {
             text = URLEncoder.encode(text, "UTF-8");
@@ -32,7 +32,9 @@ public class KarotzInterface {
             Toast.makeText(context,"unsupported character set",Toast.LENGTH_SHORT).show();
         }
 
-        String URL = "http://" + kIP + "/cgi-bin/tts?voice=alice&text="+text+"&nocache=0";
+        voice = voice.toLowerCase();
+
+        String URL = "http://" + kIP + "/cgi-bin/tts?voice="+voice+"&text="+text+"&nocache=0";
 
 
         try {

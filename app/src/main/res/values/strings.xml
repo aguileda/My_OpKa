@@ -4,5 +4,16 @@
     <string name="app_name">My OpKa</string>
     <string name="speak_button">Send</string>
     <string name="action_settings">Settings</string>
+    <string name="text_to_say">Texte à prononcer</string>
+    <string name="voice_select">Sélectionner une voix</string>
+    <string-array name="voices_array">
+        <item>Alice</item>
+        <item>Claire</item>
+        <item>Julie</item>
+        <item>Margaux</item>
+        <item>Antoine</item>
+        <item>Bruno</item>
+        <item>Louise</item>
+    </string-array>
 
 </resources>
