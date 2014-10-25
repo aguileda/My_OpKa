@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">My OpKa</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="speak_button">Send</string>
     <string name="action_settings">Settings</string>
 
 </resources>
