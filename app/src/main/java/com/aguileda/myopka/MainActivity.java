@@ -1,7 +1,9 @@
 package com.aguileda.myopka;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +22,7 @@ public class MainActivity extends Activity {
     private KarotzInterface myKarotz;
     private Spinner voiceSpinner;
     private EditText text;
+    private SharedPreferences mPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +42,6 @@ public class MainActivity extends Activity {
         voiceSpinner.setAdapter(adapter);
 
         sendButton = (Button) findViewById(R.id.sendButton);
-
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -47,24 +49,47 @@ public class MainActivity extends Activity {
                 String textToSay = MainActivity.this.text.getText().toString();
 
                 String voice = MainActivity.this.voiceSpinner.getSelectedItem().toString();
+                Toast.makeText(MainActivity.this,String.valueOf(MainActivity.this.voiceSpinner.getSelectedItemPosition()),Toast.LENGTH_SHORT).show();
 
                 MainActivity.this.myKarotz.saySomething(textToSay,voice);
             }
         });
 
         clearButton = (Button) findViewById(R.id.clearButton);
-
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 MainActivity.this.text.setText("");
-
-
             }
         });
+
+        loadState();
     }
 
+    private void loadState(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String savedText = sharedPreferences.getString("current_text", "");
+        int savedVoiceIndex = sharedPreferences.getInt("current_voice", 0);
+
+        text.setText(savedText);
+        voiceSpinner.setSelection(savedVoiceIndex);
+    }
+
+    private void saveState(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor ed = sharedPreferences.edit();
+        ed.putInt("current_voice", voiceSpinner.getSelectedItemPosition());
+        ed.putString("current_text",text.getText().toString());
+        ed.apply();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveState();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
