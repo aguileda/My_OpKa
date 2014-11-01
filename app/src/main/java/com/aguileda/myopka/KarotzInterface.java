@@ -16,11 +16,15 @@ import java.nio.charset.UnsupportedCharsetException;
  */
 public class KarotzInterface {
 
-    private String kIP = "192.168.0.19";
+    private String kIP;
     private Context context;
     public KarotzInterface(Context context){
         this.context = context;
 
+    }
+
+    public void setKIp(String IP){
+        kIP = IP;
     }
 
     public void saySomething(String text, String voice) {

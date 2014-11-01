@@ -8,11 +8,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.aguileda.myopka.KarotzInterface;
+import com.aguileda.myopka.util.ObjectSerializer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
@@ -21,8 +28,10 @@ public class MainActivity extends Activity {
     private Button clearButton;
     private KarotzInterface myKarotz;
     private Spinner voiceSpinner;
-    private EditText text;
-    private SharedPreferences mPrefs;
+    private AutoCompleteTextView text;
+    private HistoryAdapter adapterH;
+    private ArrayList<String> historyList;
+    private TextView debugText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +39,15 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         myKarotz = new KarotzInterface(this);
 
-        text = (EditText) findViewById(R.id.editText);
+        debugText = (TextView) findViewById(R.id.debugText);
+        text = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
+
+        if (historyList == null){
+            historyList = new ArrayList<String>();
+        }
+
+
+
 
         voiceSpinner = (Spinner) findViewById(R.id.voiceSpinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -38,10 +55,12 @@ public class MainActivity extends Activity {
                 R.array.voices_array, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         // Apply the adapter to the spinner
         voiceSpinner.setAdapter(adapter);
 
         sendButton = (Button) findViewById(R.id.sendButton);
+
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,9 +68,15 @@ public class MainActivity extends Activity {
                 String textToSay = MainActivity.this.text.getText().toString();
 
                 String voice = MainActivity.this.voiceSpinner.getSelectedItem().toString();
-                Toast.makeText(MainActivity.this,String.valueOf(MainActivity.this.voiceSpinner.getSelectedItemPosition()),Toast.LENGTH_SHORT).show();
 
                 MainActivity.this.myKarotz.saySomething(textToSay,voice);
+
+                addItemToHistory(textToSay);
+
+                MainActivity.this.text.setText("");
+
+
+
             }
         });
 
@@ -64,24 +89,70 @@ public class MainActivity extends Activity {
         });
 
         loadState();
+
+        adapterH = new HistoryAdapter
+                (this,R.layout.history_item,historyList);
+
+        adapterH.setNotifyOnChange(true);
+        text.setAdapter(adapterH);
     }
 
     private void loadState(){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String savedText = sharedPreferences.getString("current_text", "");
         int savedVoiceIndex = sharedPreferences.getInt("current_voice", 0);
 
-        text.setText(savedText);
+        try {
+            historyList = (ArrayList<String>) ObjectSerializer.
+                    deserialize(sharedPreferences.getString("history",
+                            ObjectSerializer.serialize(new ArrayList<String>())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         voiceSpinner.setSelection(savedVoiceIndex);
+        myKarotz.setKIp("192.168.0.19");
     }
 
     private void saveState(){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor ed = sharedPreferences.edit();
         ed.putInt("current_voice", voiceSpinner.getSelectedItemPosition());
-        ed.putString("current_text",text.getText().toString());
+
+        try {
+            ed.putString("history", ObjectSerializer.serialize(historyList));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         ed.apply();
+
+    }
+
+    public void setDebugText(){
+        debugText.setText(String.valueOf(historyList));
+    }
+
+    public void addItemToHistory(String data) {
+
+        if (!historyList.contains(data)) {
+
+            historyList.add(data);
+            adapterH = new HistoryAdapter
+                    (MainActivity.this, R.layout.history_item, historyList);
+            text.setAdapter(adapterH);
+        }
+    }
+
+
+    public void removeItemFromHistory(int index){
+
+        historyList.remove(index);
+        adapterH = new HistoryAdapter
+                (MainActivity.this, R.layout.history_item, historyList);
+        text.setAdapter(adapterH);
+        text.dismissDropDown();
+        text.setText("");
 
     }
 

@@ -17,4 +17,9 @@
         <item>Louise</item>
     </string-array>
 
+    <string-array name="sentence_array">
+        <item>c\'est l\'heure du bain</item>
+        <item>c\'est l\'heure d\'aller à l\'école</item>
+    </string-array>
+
 </resources>
